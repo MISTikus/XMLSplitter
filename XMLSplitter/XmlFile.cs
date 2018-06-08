@@ -1,5 +1,4 @@
-﻿using System.Collections.Concurrent;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Xml.Linq;
@@ -44,24 +43,17 @@ namespace XMLSplitter
             return clone;
         }
 
-        private void ClearWritable()
-        {
-            this.writableNode.RemoveNodes();
-        }
+        private void ClearWritable() => this.writableNode.RemoveNodes();
 
-        public int GetSize()
-        {
-            return Encoding.Unicode.GetByteCount(this.document.ToString());
-        }
+        public int GetSize() => Encoding.Unicode.GetByteCount(this.document.ToString());
+
+        public static int GetSize(string content) => Encoding.Unicode.GetByteCount(content);
 
         /// <summary>
         /// Serialize document to xml string
         /// </summary>
         /// <returns></returns>
-        public override string ToString()
-        {
-            return this.document.ToString();
-        }
+        public override string ToString() => this.document.ToString();
 
         internal void Add(XElement node)
         {
@@ -72,28 +64,23 @@ namespace XMLSplitter
 
         public IEnumerable<XmlFile> Split(int splittedFileSize)
         {
-            var result = new ConcurrentQueue<XmlFile>();
             var file = this.Clone();
-            int i = 0;
+            var i = 0;
             var current = this.writableNode;
 
-            current
+            foreach (var g in current
                 .Elements()
                 .Select(n => new { i = i++, n })
-                .GroupBy(g => g.i % 100)
-                .Select(g =>
+                .GroupBy(g => g.i % 100))
+            {
+                foreach (var node in g)
+                    file.Add(node.n);
+                if (file.GetSize() >= splittedFileSize)
                 {
-                    foreach (var node in g)
-                        file.Add(node.n);
-                    if (file.GetSize() >= splittedFileSize)
-                    {
-                        result.Enqueue(file);
-                        file = this.Clone();
-                    }
-                    return true;
-                })
-                .ToList();
-            return result.ToList();
+                    yield return file;
+                    file = this.Clone();
+                }
+            }
         }
     }
 }

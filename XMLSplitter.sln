@@ -3,11 +3,14 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.26430.12
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XMLSplitter", "XMLSplitter\XMLSplitter.csproj", "{30A45A45-1213-4B21-B3F9-CD1516E51186}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "XMLSplitter", "XMLSplitter\XMLSplitter.csproj", "{30A45A45-1213-4B21-B3F9-CD1516E51186}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XMLSplitter.Tests", "XMLSplitter.Tests\XMLSplitter.Tests.csproj", "{72CA0565-10BE-4768-9F62-EA9CB145C436}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "XMLSplitter.Tests", "XMLSplitter.Tests\XMLSplitter.Tests.csproj", "{72CA0565-10BE-4768-9F62-EA9CB145C436}"
 EndProject
 Global
+	GlobalSection(Performance) = preSolution
+		HasPerformanceSessions = true
+	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Release|Any CPU = Release|Any CPU
@@ -24,5 +27,11 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {CA519B4B-E7B6-416A-B786-287EE0450F00}
+	EndGlobalSection
+	GlobalSection(Performance) = preSolution
+		HasPerformanceSessions = true
 	EndGlobalSection
 EndGlobal

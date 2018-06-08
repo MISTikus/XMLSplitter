@@ -2,7 +2,7 @@
   "profiles": {
     "XMLSplitter": {
       "commandName": "Project",
-      "commandLineArgs": "-sf:\"d:\\temp\\references_.xml\" -s:50 -d:\"d:\\temp\\splitted\""
+      "commandLineArgs": "-sf:\"d:\\temp\\references.xml\" -s:50 -d:\"d:\\temp\\splitted\""
     }
   }
 }
