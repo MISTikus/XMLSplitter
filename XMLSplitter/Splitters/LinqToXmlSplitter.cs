@@ -1,35 +1,37 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Xml;
 using System.Xml.Linq;
+using XMLSplitter.Interfaces;
 
 namespace XMLSplitter
 {
-    public class Splitter
+    public class LinqToXmlSplitter : ISplitter
     {
-        private IFileReader reader;
-        private IFileWriter writer;
+        private readonly IFileReader reader;
+        private readonly IFileWriter writer;
+        private readonly IIOWrapper ioWrapper;
 
-        public Splitter(IFileReader reader, IFileWriter writer)
+        public LinqToXmlSplitter(IFileReader reader, IFileWriter writer, IIOWrapper ioWrapper)
         {
             this.reader = reader;
             this.writer = writer;
+            this.ioWrapper = ioWrapper;
         }
 
         public void SaveSplitted(string sourceFileName, int splittedFileSize, string destinationDirectory)
         {
-            if (!Directory.Exists(destinationDirectory))
-                Directory.CreateDirectory(destinationDirectory);
+            if (!this.ioWrapper.DirectoryExists(destinationDirectory))
+                this.ioWrapper.CreateDirectory(destinationDirectory);
 
             var locker = new object();
             Func<bool, string, int, string> getFileName = (wi, s, i) =>
             {
-                lock (locker)
+                lock(locker)
                 {
-                    return $"{destinationDirectory}\\{Path.GetFileNameWithoutExtension(sourceFileName)}_{s}{(wi ? $"_{i}" : "")}.xml";
+                    return $"{destinationDirectory}\\{this.ioWrapper.GetFileNameWithoutExtension(sourceFileName)}_{s}{(wi ? $"_{i}" : "")}.xml";
                 }
             };
 
@@ -50,7 +52,7 @@ namespace XMLSplitter
                 return new XmlFile(rootName, attributes);
             };
 
-            using (var reader = XmlReader.Create(sourceFileName))
+            using(var reader = XmlReader.Create(sourceFileName))
             {
                 var hierarchy = 0;
                 var root = "";
@@ -64,7 +66,7 @@ namespace XMLSplitter
                     {
                         root = reader.LocalName;
 
-                        using (var subReader = reader.ReadSubtree())
+                        using(var subReader = reader.ReadSubtree())
                         {
                             while (subReader.Read())
                             {
@@ -76,7 +78,7 @@ namespace XMLSplitter
                                     parent = subReader.LocalName;
 
                                     var i = 0;
-                                    using (var elementReader = subReader.ReadSubtree())
+                                    using(var elementReader = subReader.ReadSubtree())
                                     {
                                         while (elementReader.Read())
                                         {
@@ -95,7 +97,7 @@ namespace XMLSplitter
                                                     {
                                                         var file = getNewFile();
                                                         toSave.ForEach(file.Add);
-                                                        this.writer.Write(getFileName(true, current, i++), file.ToString());
+                                                        this.writer.FileWriteAllText(getFileName(true, current, i++), file.ToString());
                                                     }
                                                 }
                                             }
