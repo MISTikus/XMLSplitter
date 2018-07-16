@@ -37,7 +37,7 @@ namespace XMLSplitter.Splitters
             var firstRow = string.Empty;
             var hierarchy = new Stack<Tag>();
             var buffer = string.Empty;
-            Tag carret = null;
+            Tag carret = default(Tag);
 
             foreach (char c in this.ioWrapper.Read(sourceFileName))
             {
@@ -51,22 +51,35 @@ namespace XMLSplitter.Splitters
                     continue;
                 }
 
-                if (carret == null)
+                if (carret.IsDefault)
                 {
                     if (!IsMatch(this.tagBegin, buffer))
                         continue;
-                    carret = ParseTag(this.tagBegin, buffer);
+                    carret = ParseTag(buffer);
                     buffer = string.Empty;
-                }
-                if (!IsMatch(this.tagEnd, buffer))
                     continue;
+                }
 
+                if (IsMatch(this.tagEnd, buffer))
+                {
+                    carret.Body += ParseBody(buffer);
+                    buffer = string.Empty;
+                    continue;
+                }
+
+                if (IsMatch(this.tagBegin, buffer))
+                {
+                    hierarchy.Push(carret);
+                    carret = ParseTag(buffer);
+                    buffer = string.Empty;
+                    continue;
+                }
             }
         }
 
-        private Tag ParseTag(Regex expression, string buffer)
+        private Tag ParseTag(string buffer)
         {
-            var match = expression.Match(buffer);
+            var match = this.tagBegin.Match(buffer);
             var tag = new Tag
             {
                 Name = match.Groups["name"].Value,
@@ -76,13 +89,20 @@ namespace XMLSplitter.Splitters
             return tag;
         }
 
+        private string ParseBody(string buffer)
+        {
+            var match = this.tagEnd.Match(buffer);
+            var body = match.Groups["body"].Value;
+            return body;
+        }
+
         private bool IsMatch(Regex expression, string buffer) => expression.IsMatch(buffer);
 
         #region patterns
 
         private const string firstRowPattern = @"<\??xml[^>]*>";
         private const string tagBeginPattern = "<(?<name>[\\w\\d]+)(?<attributes>\\s+[\\w\\d]+=?\"?[\\w\\d]+\"?){0,}(?<isClosed>\\s*\\/)?>";
-        private const string tagEndPattern = @"<\/(?<name>[\w\d]+)>";
+        private const string tagEndPattern = @"(?<body>.*)<\/(?<name>[\w\d]+)>";
 
         #endregion patterns
     }
