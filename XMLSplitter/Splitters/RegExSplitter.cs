@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text.RegularExpressions;
 using XMLSplitter.Interfaces;
 using XMLSplitter.Models;
@@ -28,7 +27,7 @@ namespace XMLSplitter.Splitters
 
             Func<bool, string, int, string> getFileName = (indexed, tagName, index) =>
             {
-                lock(locker)
+                lock (locker)
                 {
                     return $"{destinationDirectory}\\{this.ioWrapper.GetFileNameWithoutExtension(sourceFileName)}_{tagName}{(indexed ? $"_{index}" : "")}.xml";
                 }
@@ -37,9 +36,9 @@ namespace XMLSplitter.Splitters
             var firstRow = string.Empty;
             var hierarchy = new Stack<Tag>();
             var buffer = string.Empty;
-            Tag carret = default(Tag);
+            var carret = default(Tag);
 
-            foreach (char c in this.ioWrapper.Read(sourceFileName))
+            foreach (var c in this.ioWrapper.Read(sourceFileName))
             {
                 buffer += c;
                 if (string.IsNullOrWhiteSpace(firstRow))
@@ -64,7 +63,17 @@ namespace XMLSplitter.Splitters
                 {
                     carret.Body += ParseBody(buffer);
                     buffer = string.Empty;
-                    continue;
+                    var temp = carret;
+                    if (hierarchy.TryPop(out carret))
+                    {
+                        carret.Body += temp.ToString();
+                        continue;
+                    }
+                    else
+                    {
+                        FinalizeFile(firstRow, temp);
+                        break;
+                    }
                 }
 
                 if (IsMatch(this.tagBegin, buffer))
@@ -76,6 +85,8 @@ namespace XMLSplitter.Splitters
                 }
             }
         }
+
+        private void FinalizeFile(string firstRow, Tag temp) => this.ioWrapper.FileWriteAllText("", firstRow + temp.ToString());
 
         private Tag ParseTag(string buffer)
         {
