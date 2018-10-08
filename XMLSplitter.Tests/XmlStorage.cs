@@ -2,9 +2,8 @@
 {
     public class XmlStorage
     {
-        public static string GetXml()
-        {
-            return @"<?xml version=""1.0"" encoding=""windows-1251""?>
+        public const string TestXml = 
+		@"<?xml version=""1.0"" encoding=""windows-1251""?>
 <Items>
 	<Item>
 		<SupplierItemCode>100100</SupplierItemCode>
@@ -6209,6 +6208,5 @@
 		<Status>Archived</Status>
 	</Item>
 </Items>";
-        }
     }
 }

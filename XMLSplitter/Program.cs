@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using XMLSplitter.Helpers;
+using XMLSplitter.Interfaces;
 
 namespace XMLSplitter
 {
@@ -11,9 +13,9 @@ namespace XMLSplitter
             try
             {
                 arguments = ArgumentParser.Parse(args);
-                var filesAdapter = new FilesAdapter();
-                var splitter = new Splitter(filesAdapter, filesAdapter);
-                int size = (int)(decimal.Parse(arguments[ArgumentType.SplittedFileSize]) * 1024m * 1024m * 1.8m);
+                var ioWrapper = new IOWrapper();
+                ISplitter splitter = new LinqToXmlSplitter(ioWrapper, ioWrapper, ioWrapper);
+                int size = (int) (decimal.Parse(arguments[ArgumentType.SplittedFileSize]) * 1024m * 1024m * 1.8m);
                 splitter.SaveSplitted(arguments[ArgumentType.SourceFileName], size, arguments[ArgumentType.DestinationFolder]);
             }
             catch (Exception e)

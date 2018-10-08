@@ -1,11 +1,12 @@
 ﻿using System.Collections.Generic;
 using FluentAssertions;
 using Moq;
+using XMLSplitter.Interfaces;
 using Xunit;
 
 namespace XMLSplitter.Tests
 {
-    public class SplitterTests
+    public class LinqToXmlSplitterTests
     {
         [Fact]
         public void SaveSplittedShouldSaveSplittedDocumentsByPassedSize()
@@ -13,11 +14,12 @@ namespace XMLSplitter.Tests
             var files = new Dictionary<string, string>();
 
             var fileReaderMock = new Mock<IFileReader>();
-            fileReaderMock.Setup(c => c.Read(It.IsAny<string>())).Returns(XmlStorage.GetXml());
+            fileReaderMock.Setup(c => c.FileReadAllText(It.IsAny<string>())).Returns(XmlStorage.TestXml);
             var fileWriterMock = new Mock<IFileWriter>();
-            fileWriterMock.Setup(c => c.Write(It.IsAny<string>(), It.IsAny<string>())).Callback<string, string>((f, s) => files.Add(f, s));
+            fileWriterMock.Setup(c => c.FileWriteAllText(It.IsAny<string>(), It.IsAny<string>())).Callback<string, string>((f, s) => files.Add(f, s));
+            var ioWrapperMoq = new Mock<IIOWrapper>();
 
-            var splitter = new Splitter(fileReaderMock.Object, fileWriterMock.Object);
+            var splitter = new LinqToXmlSplitter(fileReaderMock.Object, fileWriterMock.Object, ioWrapperMoq.Object);
 
             splitter.SaveSplitted(string.Empty, 10, string.Empty);
 
